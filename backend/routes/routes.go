@@ -10,5 +10,5 @@ import (
 
 func RegisterRoutes(router *gin.Engine) {
 	router.GET("/", controllers.Home)
-	router.GET("/api/doctors", controllers.GetDoctors)
+	router.GET("/api/doctors/nearby", controllers.GetNearbyDoctors)
 }
