@@ -1,0 +1,52 @@
+/* src/assets/main.css */
+
+/* Box-sizing for consistent padding and border behavior */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Reset body styles */
+body {
+  font-family: 'Arial', sans-serif; /* Use a clean and readable font */
+  background-color: #f9fafb; /* Light neutral background color */
+  color: #333; /* Default text color */
+  line-height: 1.6;
+}
+
+/* Remove default list styles */
+ul,
+ol {
+  list-style: none;
+}
+
+/* Anchor tag reset */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Global button styles */
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+/* Image styling */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Add a base container class for layouts */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
