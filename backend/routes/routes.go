@@ -12,4 +12,5 @@ func RegisterRoutes(router *gin.Engine) {
 	router.GET("/", controllers.Home)
 	router.GET("/doctors", controllers.GetDoctors)
 	router.GET("/doctors/nearby", controllers.GetNearbyDoctors)
+	router.POST("/book", controllers.BookAppointment)
 }

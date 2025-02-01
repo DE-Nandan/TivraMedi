@@ -17,4 +17,4 @@ function navigateToApp() {
 }
 </script>
 
-<style src="@/assets/LandingPage.css"></style>
+<style src="@/assets/css/LandingPage.css"></style>
