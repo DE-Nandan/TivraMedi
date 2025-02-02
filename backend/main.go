@@ -16,7 +16,7 @@ func main() {
 
 	// Add CORS middleware
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // Add your frontend's origin here
+		AllowOrigins:     []string{"http://localhost:5173", "http://192.168.1.5:5173"}, // Add your frontend's origin here
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
@@ -24,5 +24,5 @@ func main() {
 
 	routes.RegisterRoutes(router)
 	// Start the server on port 8080
-	router.Run(":8080")
+	router.Run("0.0.0.0:8080")
 }

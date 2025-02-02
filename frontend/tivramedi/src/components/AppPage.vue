@@ -16,6 +16,14 @@ const { loading, error, initializeMap } = useDoctorsMap();
 
 onMounted(() => {
   initializeMap('map-container');
+
+  const eventSource = new EventSource('http://localhost:8080/events');
+	
+	eventSource.onmessage = (event) => {
+		console.log('Real-time update:', event.data);
+		// Update UI or show notification
+		alert(`Live update: ${event.data}`);
+	};
 });
 
 </script>

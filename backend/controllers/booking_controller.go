@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"time"
 	"tivramedi/database"
 	"tivramedi/models"
 
@@ -22,11 +23,10 @@ func BookAppointment(c *gin.Context) {
 
 	// Creating a dummy booking (can replace this logic later with real user authentication)
 	booking := models.Booking{
-		DoctorID:   bookingRequest.DoctorID,
-		CustomerID: 1, // dummy customer
-		TimeSlot:   bookingRequest.TimeSlot,
-		CreatedAt:  "gibberish",
-		UpdatedAt:  "gib2", // Use real timestamp later
+		DoctorID:  bookingRequest.DoctorID,
+		Customer:  "dummy_customer",
+		TimeSlot:  bookingRequest.TimeSlot,
+		CreatedAt: time.Now().Unix(), // Proper timestamp
 	}
 
 	// Save the booking to the database
@@ -35,7 +35,16 @@ func BookAppointment(c *gin.Context) {
 		return
 	}
 
+	cIP := c.ClientIP()
+
+	// Send notification through broker
+	msg := fmt.Sprintf("New booking for Doctor %d at %s by %s", booking.DoctorID, booking.TimeSlot, cIP)
+	go func() {
+		BookingBroker.Broadcast(msg)
+	}()
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": fmt.Sprintf("Booking created for Doctor ID %d at %s", booking.DoctorID, booking.TimeSlot),
+		"message": "Booking created",
+		"id":      booking.ID,
 	})
 }

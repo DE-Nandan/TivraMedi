@@ -13,4 +13,5 @@ func RegisterRoutes(router *gin.Engine) {
 	router.GET("/doctors", controllers.GetDoctors)
 	router.GET("/doctors/nearby", controllers.GetNearbyDoctors)
 	router.POST("/book", controllers.BookAppointment)
+	router.GET("/events", gin.WrapH(controllers.BookingBroker))
 }
