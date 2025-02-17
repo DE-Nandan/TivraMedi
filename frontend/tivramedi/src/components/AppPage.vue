@@ -23,6 +23,22 @@ onMounted(() => {
 		console.log('Real-time update:', event.data);
 		// Update UI or show notification
 		alert(`Live update: ${event.data}`);
+
+    try {
+      const data = JSON.parse(event.data); // Convert received data into JSON
+      console.log("here"+data)
+      if (data.type === 'availability') {
+        // Update doctor availability status in UI
+        const statusElement = document.getElementById(`doctor-${data.doctorID}-status`);
+        if (statusElement) {
+          statusElement.textContent = data.available ? '✅ Available' : '❌ Unavailable';
+        }
+      }
+    } catch (error) {
+      console.error('Error processing SSE event:', error);
+    }
+
+
 	};
 });
 

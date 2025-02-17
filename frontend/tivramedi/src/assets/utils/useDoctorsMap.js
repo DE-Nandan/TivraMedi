@@ -33,6 +33,8 @@ export default function useDoctorsMap() {
   const error = ref(null);
   let map = null; // Store the map instance
 
+  let markers = {}; 
+
   const initializeMap = async (containerId) => {
     try {
       // Ensure the DOM is ready
@@ -67,32 +69,39 @@ export default function useDoctorsMap() {
 
       // Fetch doctors from the backend
       const response = await axios.get('http://localhost:8080/doctors');
-      doctors.value = response.data;
+      //doctors.value = response.data;
+      console.log(response.data)
+      doctors.value = response.data.filter(doctor => doctor.Availability);
+      
+      doctors.value.forEach(doctor => addDoctorMarker(doctor));
 
+       // Start listening for real-time updates
+       listenForDoctorUpdates();
       // Add doctor markers to map
-      doctors.value.forEach(doctor => {
-        const marker = L.marker([doctor.Latitude, doctor.Longitude], {
-          icon: greenIcon
-        });
+      // doctors.value.forEach(doctor => {
+      //   const marker = L.marker([doctor.Latitude, doctor.Longitude], {
+      //     icon: greenIcon
+      //   });
+      //   const popupContent = `
+      //     <div class="doctor-popup">
+      //       <h3>${doctor.Name}</h3>
+      //       <p><strong>Specialty:</strong> ${doctor.Specialty}</p>
+      //       <p><strong>Status:</strong> <span id="doctor-${doctor.ID}-status">${doctor.Availability ? '✅ Available' : '❌ Unavailable'}</span></p>
+      //       <button class="book-btn" onclick="bookAppointment(${doctor.ID})">Book</button>
+      //     </div>
+      //   `;
+
       
-        const popupContent = `
-        <div class="doctor-popup">
-          <h3>${doctor.Name}</h3>
-          <p><strong>Specialty:</strong> ${doctor.Specialty}</p>
-          <button class="book-btn">Book</button>
-        </div>
-      `;
-      
-      marker.bindPopup(popupContent).addTo(map);
+      // marker.bindPopup(popupContent).addTo(map);
        
-        // Bind the bookAppointment function to the button inside the popup
-        marker.on('popupopen', () => {
-          const bookButton = marker.getPopup().getElement().querySelector('.book-btn');
-          if (bookButton) {
-            bookButton.onclick = () => bookAppointment(doctor.ID);
-          }
-        });
-      });
+      //   // Bind the bookAppointment function to the button inside the popup
+      //   marker.on('popupopen', () => {
+      //     const bookButton = marker.getPopup().getElement().querySelector('.book-btn');
+      //     if (bookButton) {
+      //       bookButton.onclick = () => bookAppointment(doctor.ID);
+      //     }
+      //   });
+      // });
 
     } catch (err) {
       error.value = 'Error loading map: ' + err.message;
@@ -100,6 +109,77 @@ export default function useDoctorsMap() {
       loading.value = false;
     }
   };
+
+
+  // Function to add a doctor marker
+  const addDoctorMarker = (doctor) => {
+    if (markers[doctor.ID]) return;  // Prevent duplicate markers
+
+    const marker = L.marker([doctor.Latitude, doctor.Longitude], {
+      icon: greenIcon
+    });
+
+    const popupContent = `
+      <div class="doctor-popup">
+        <h3>${doctor.Name}</h3>
+        <p><strong>Specialty:</strong> ${doctor.Specialty}</p>
+        <p><strong>Status:</strong> <span id="doctor-${doctor.ID}-status">${doctor.Availability ? '✅ Available' : '❌ Unavailable'}</span></p>
+        <button class="book-btn" onclick="bookAppointment(${doctor.ID})">Book</button>
+      </div>
+    `;
+
+    marker.bindPopup(popupContent).addTo(map);
+    markers[doctor.ID] = marker; // Store marker
+
+    // Bind the bookAppointment function to the button inside the popup
+    marker.on('popupopen', () => {
+      const bookButton = marker.getPopup().getElement().querySelector('.book-btn');
+      if (bookButton) {
+        bookButton.onclick = () => bookAppointment(doctor.ID);
+      }
+    });
+  };
+
+
+    // Function to remove a doctor marker
+    const removeDoctorMarker = (doctorID) => {
+      if (markers[doctorID]) {
+        markers[doctorID].remove(); // Remove from map
+        delete markers[doctorID]; // Remove from stored markers
+      }
+    };
+
+
+
+
+     // Listen for SSE updates
+  const listenForDoctorUpdates = () => {
+    const eventSource = new EventSource('http://localhost:8080/events');
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data); // Assuming JSON response
+      console.log('Real-time update:', data);
+
+      // Update UI
+      const statusElement = document.getElementById(`doctor-${data.doctorID}-status`);
+      if (statusElement) {
+        statusElement.textContent = data.available ? '✅ Available' : '❌ Unavailable';
+      }
+
+      // Remove or add marker based on availability
+      if (!data.available) {
+        removeDoctorMarker(data.doctorID);
+      } else {
+        // Fetch doctor details and add the marker
+        axios.get(`http://localhost:8080/doctors/${data.doctorID}`)
+          .then(response => addDoctorMarker(response.data))
+          .catch(err => console.error("Error fetching doctor data:", err));
+      }
+    };
+  };
+
+
+
 
    const bookAppointment = async (doctorId) => {
     const timeSlot = "2023-08-15 10:00";  // Replace with actual time slot selection logic

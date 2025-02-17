@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 	"tivramedi/database"
@@ -35,12 +34,12 @@ func BookAppointment(c *gin.Context) {
 		return
 	}
 
-	cIP := c.ClientIP()
+	//	cIP := c.ClientIP()
 
 	// Send notification through broker
-	msg := fmt.Sprintf("New booking for Doctor %d at %s by %s", booking.DoctorID, booking.TimeSlot, cIP)
+	//	msg := fmt.Sprintf("New booking for Doctor %d at %s by %s", booking.DoctorID, booking.TimeSlot, cIP)
 	go func() {
-		BookingBroker.Broadcast(msg)
+		BookingBroker.UpdateDoctorAvailability(int(booking.DoctorID), false)
 	}()
 
 	c.JSON(http.StatusOK, gin.H{
