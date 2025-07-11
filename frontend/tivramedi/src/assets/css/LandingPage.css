@@ -1,34 +1,67 @@
-/* src/styles/LandingPage.css */
 #landing-page {
-    height: 100vh;
-    width: 100vw;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f3f4f6;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f3f4f6;
 }
 
 .content {
-    text-align: center;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ensures child elements are centered */
+  gap: 1rem; /* spacing between buttons */
 }
 
 .title {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    color: #4caf50;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  color: #4caf50;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.explore-btn,
+.triage-btn {
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .explore-btn {
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    font-size: 1.25rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  background-color: #4caf50;
+  color: white;
 }
 
 .explore-btn:hover {
-    background-color: #45a049;
+  background-color: #45a049;
+}
+
+.triage-btn {
+  background-color: #2196f3;
+  color: white;
+}
+
+.triage-btn:hover {
+  background-color: #0b7dda;
+}
+
+.triage-btn span {
+  margin-left: 0.5rem;
 }

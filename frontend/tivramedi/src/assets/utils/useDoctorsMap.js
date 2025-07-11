@@ -158,8 +158,8 @@ export default function useDoctorsMap() {
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data); // Assuming JSON response
-      console.log('Real-time update:', data);
-
+      console.log('Real-time update2:', data);
+      alert(`Live update: ${event.data}`);
       // Update UI
       const statusElement = document.getElementById(`doctor-${data.doctorID}-status`);
       if (statusElement) {
