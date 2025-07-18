@@ -66,6 +66,7 @@ func main() {
 			"http://192.168.10.1:5173",
 			"http://192.168.1.3:5173",
 			"http://192.168.40.1:5173",
+			"http://192.168.1.6:5173",
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},

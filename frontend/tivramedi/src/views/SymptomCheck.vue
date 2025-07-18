@@ -130,7 +130,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import { assessSymptoms } from '@/services/triageService'
 
 const symptomsText = ref('')
 const result = ref(null)
@@ -164,11 +164,8 @@ async function checkUrgency() {
     error.value = ''
     result.value = null
 
-    const response = await axios.post('http://localhost:8080/triage', {
-      text: symptomsText.value,
-    })
-
-    result.value = response.data
+    // Use centralized service
+    result.value = await assessSymptoms(symptomsText.value)
 
     // Handle unknown response
     if (result.value.urgency === 'unknown') {

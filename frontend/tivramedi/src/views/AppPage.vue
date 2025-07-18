@@ -167,24 +167,6 @@ const { loading, error, initializeMap } = useDoctorsMap()
 
 onMounted(() => {
   initializeMap('map')
-
-  // Simulate real-time updates
-  setInterval(() => {
-    // This would be your actual SSE implementation
-    console.log('Checking for real-time updates...')
-
-    // Simulate an update
-    const event = {
-      type: 'availability',
-      doctorID: '123',
-      available: Math.random() > 0.5,
-    }
-
-    console.log('Real-time update:', event)
-
-    // In a real implementation, you would update the UI here
-    // For now, we'll just log it
-  }, 10000)
 })
 </script>
 

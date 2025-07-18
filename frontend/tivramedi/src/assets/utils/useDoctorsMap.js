@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { fetchDoctors, fetchDoctorDetails, bookAppointment } from '@/services/mapService'
 
 // Default Leaflet marker icon setup
 const defaultIcon = L.icon({
@@ -31,6 +32,8 @@ export default function useDoctorsMap() {
   let map = null // Store the map instance
 
   let markers = {}
+
+  const eventsEndpoint = import.meta.env.VUE_APP_EVENTS_ENDPOINT || 'http://localhost:8080/events'
 
   const initializeMap = async (containerId) => {
     try {
@@ -63,39 +66,13 @@ export default function useDoctorsMap() {
         .addTo(map)
 
       // Fetch doctors from the backend
-      const response = await axios.get('http://localhost:8080/doctors')
-      //doctors.value = response.data;
-      console.log(response.data)
-      doctors.value = response.data.filter((doctor) => doctor.Availability)
+      doctors.value = await fetchDoctors()
+      doctors.value = doctors.value.filter((doctor) => doctor.Availability)
 
       doctors.value.forEach((doctor) => addDoctorMarker(doctor))
 
-      // Start listening for real-time updates
+      // Listening to SSE Events
       listenForDoctorUpdates()
-      // Add doctor markers to map
-      // doctors.value.forEach(doctor => {
-      //   const marker = L.marker([doctor.Latitude, doctor.Longitude], {
-      //     icon: greenIcon
-      //   });
-      //   const popupContent = `
-      //     <div class="doctor-popup">
-      //       <h3>${doctor.Name}</h3>
-      //       <p><strong>Specialty:</strong> ${doctor.Specialty}</p>
-      //       <p><strong>Status:</strong> <span id="doctor-${doctor.ID}-status">${doctor.Availability ? '✅ Available' : '❌ Unavailable'}</span></p>
-      //       <button class="book-btn" onclick="bookAppointment(${doctor.ID})">Book</button>
-      //     </div>
-      //   `;
-
-      // marker.bindPopup(popupContent).addTo(map);
-
-      //   // Bind the bookAppointment function to the button inside the popup
-      //   marker.on('popupopen', () => {
-      //     const bookButton = marker.getPopup().getElement().querySelector('.book-btn');
-      //     if (bookButton) {
-      //       bookButton.onclick = () => bookAppointment(doctor.ID);
-      //     }
-      //   });
-      // });
     } catch (err) {
       error.value = 'Error loading map: ' + err.message
     } finally {
@@ -127,7 +104,7 @@ export default function useDoctorsMap() {
     marker.on('popupopen', () => {
       const bookButton = marker.getPopup().getElement().querySelector('.book-btn')
       if (bookButton) {
-        bookButton.onclick = () => bookAppointment(doctor.ID)
+        bookButton.onclick = () => handleBookAppointment(doctor.ID)
       }
     })
   }
@@ -142,7 +119,7 @@ export default function useDoctorsMap() {
 
   // Listen for SSE updates
   const listenForDoctorUpdates = () => {
-    const eventSource = new EventSource('http://localhost:8080/events')
+    const eventSource = new EventSource(eventsEndpoint)
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data) // Assuming JSON response
@@ -159,25 +136,20 @@ export default function useDoctorsMap() {
         removeDoctorMarker(data.doctorID)
       } else {
         // Fetch doctor details and add the marker
-        axios
-          .get(`http://localhost:8080/doctors/${data.doctorID}`)
-          .then((response) => addDoctorMarker(response.data))
+        fetchDoctorDetails(data.doctorID)
+          .then((doctor) => addDoctorMarker(doctor))
           .catch((err) => console.error('Error fetching doctor data:', err))
       }
     }
   }
 
-  const bookAppointment = async (doctorId) => {
-    const timeSlot = '2023-08-15 10:00' // Replace with actual time slot selection logic
-    console.log(doctorId)
+  const handleBookAppointment = async (doctorId) => {
+    const timeSlot = '2023-08-15 10:00' // Replace with actual time slot selection
     try {
-      const response = await axios.post('http://localhost:8080/book', {
-        doctor_id: doctorId,
-        time_slot: timeSlot,
-      })
-      alert(response.data.message) // Display success message
+      const result = await bookAppointment(doctorId, timeSlot)
+      alert(result.message)
     } catch (err) {
-      alert('Booking failed: ' + err.message) // Display error message
+      alert('Booking failed: ' + err.message)
     }
   }
 
