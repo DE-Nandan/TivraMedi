@@ -128,32 +128,36 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
-import { assessSymptoms } from '@/services/triageService'
+import { assessSymptoms, type TriageResponse } from '@/services/triageService'
 
-const symptomsText = ref('')
-const result = ref(null)
-const loading = ref(false)
-const error = ref('')
+// Properly type all refs
+const symptomsText = ref<string>('')
+const result = ref<TriageResponse | null>(null) // Key fix: proper typing
+const loading = ref<boolean>(false)
+const error = ref<string>('')
 
-const resultClass = computed(() => {
+// Type the computed properties with proper null handling
+const resultClass = computed((): string => {
   if (!result.value) return ''
   return result.value.urgency
 })
 
-const resultHeader = computed(() => {
-  const headers = {
+const resultHeader = computed((): string => {
+  const headers: Record<string, string> = {
+    // Proper typing for headers object
     urgent: 'URGENT CARE REQUIRED',
     moderate: 'MEDICAL ATTENTION NEEDED WITHIN 24 HOURS',
     routine: 'SCHEDULE ROUTINE APPOINTMENT',
     unknown: 'SYMPTOM ANALYSIS INCONCLUSIVE',
     error: 'SERVICE TEMPORARILY UNAVAILABLE',
   }
-  return headers[result.value?.urgency] || 'Symptom Analysis'
+  return headers[result.value?.urgency || ''] || 'Symptom Analysis'
 })
 
-async function checkUrgency() {
+async function checkUrgency(): Promise<void> {
+  // Add return type
   if (!symptomsText.value.trim()) {
     error.value = 'Please describe your symptoms to get an assessment'
     return
@@ -164,11 +168,11 @@ async function checkUrgency() {
     error.value = ''
     result.value = null
 
-    // Use centralized service
-    result.value = await assessSymptoms(symptomsText.value)
+    // Use centralized service with proper age parameter (default 30)
+    result.value = await assessSymptoms(symptomsText.value, 30)
 
-    // Handle unknown response
-    if (result.value.urgency === 'unknown') {
+    // Handle unknown response with proper null check
+    if (result.value && result.value.urgency === 'unknown') {
       error.value =
         'Could not determine urgency. Please provide more specific details about your symptoms.'
     }

@@ -1,9 +1,10 @@
 node_modules
-dist
+npm-debug.log
 .git
 .gitignore
-Dockerfile
-.dockerignore
-*.md
-.vscode
+README.md
 .env
+.nyc_output
+coverage
+.nyc_output
+.vscode

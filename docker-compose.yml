@@ -1,0 +1,79 @@
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: tivramedi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - D:/Programming/Internship/Development/TivraMedi/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - tivramedi-network
+
+  # Go Backend Service
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tivramedi-backend
+    restart: unless-stopped
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PORT=${BACKEND_PORT}
+      - GIN_MODE=${GIN_MODE}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - tivramedi-network
+
+  # Vue.js Frontend Service (moved from frontend directory)
+  frontend:
+    build: 
+      context: ./frontend/tivramedi  # Updated path to your frontend
+      dockerfile: Dockerfile
+    container_name: tivramedi-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE=/api
+      - VITE_TRIAGE_BASE=/triage
+      - VITE_EVENTS_ENDPOINT=/api/events
+    depends_on:
+      - backend
+    networks:
+      - tivramedi-network
+
+# Networks
+networks:
+  tivramedi-network:
+    driver: bridge
+    name: tivramedi-network
+
+# Volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+    name: tivramedi_postgres_data

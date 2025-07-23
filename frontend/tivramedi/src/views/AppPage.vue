@@ -159,14 +159,19 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted } from 'vue'
 import useDoctorsMap from '@/assets/utils/useDoctorsMap'
 
+// TypeScript will automatically infer the types from useDoctorsMap return values
 const { loading, error, initializeMap } = useDoctorsMap()
 
-onMounted(() => {
-  initializeMap('map')
+onMounted(async (): Promise<void> => {
+  try {
+    await initializeMap('map')
+  } catch (err) {
+    console.error('Failed to initialize map:', err)
+  }
 })
 </script>
 
