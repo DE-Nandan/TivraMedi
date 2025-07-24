@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 import requests
@@ -11,11 +12,22 @@ logger = logging.getLogger("uvicorn.error")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:8080"],
+    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://frontend:80"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add health check endpoint
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "service": "tivramedi-triage",
+        "ollama_host": os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    }
+
+
 
 class Symptoms(BaseModel):
     text: str
@@ -86,13 +98,16 @@ def extract_urgency(raw_response):
 @app.post("/triage")
 async def assess_urgency(symptoms: Symptoms):
     try:
+        
+        ollama_host = os.getenv("OLLAMA_HOST", "localhost:11434")
+
         filled_prompt = MEDICAL_PROMPT.format(
             symptoms=symptoms.text,
             age=symptoms.patient_age
         )
         
         response = requests.post(
-            "http://localhost:11434/api/generate",
+             f"http://{ollama_host}/api/generate",
             json={
                 "model": "deepseek-r1:1.5b",
                 "prompt": filled_prompt,

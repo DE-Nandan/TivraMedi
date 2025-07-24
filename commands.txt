@@ -1,0 +1,95 @@
+# Start entire application (from project root)
+docker-compose up -d
+
+# Alternative: Build and start (if you made changes)
+docker-compose up --build -d
+
+
+# View all running containers
+docker-compose ps
+
+# Expected output should show 5 containers: RUNNING
+# tivramedi-postgres, tivramedi-ollama, tivramedi-backend, tivramedi-triage, tivramedi-frontend
+
+
+# PostgreSQL health
+docker exec tivramedi-postgres pg_isready -U postgres -d tivramedi
+
+# PostGIS extension check
+docker exec tivramedi-postgres psql -U postgres -d tivramedi -c "SELECT PostGIS_version();"
+
+
+# Ollama service health
+curl http://localhost:11434/api/tags
+
+# Check available models
+docker exec tivramedi-ollama ollama list
+
+
+# Backend health check
+curl http://localhost:8080/health
+
+# Test database connection through backend
+curl http://localhost:8080/doctors
+
+# Test backend through frontend proxy
+curl http://localhost:3000/api/doctors
+
+
+# Direct triage health check
+curl http://localhost:8000/health
+
+# Triage through frontend proxy
+curl http://localhost:3000/triage/health
+
+# Test triage AI functionality
+curl -X POST http://localhost:3000/triage/triage \
+  -H "Content-Type: application/json" \
+  -d '{"text": "I have severe chest pain and difficulty breathing", "patient_age": 45}'
+
+
+# Frontend web interface
+curl -I http://localhost:3000
+
+# Check nginx proxy status
+curl -I http://localhost:3000/api/
+curl -I http://localhost:3000/triage/
+
+
+
+
+# Monitor all services logs
+docker-compose logs -f
+
+# Monitor specific service logs
+docker-compose logs -f backend
+docker-compose logs -f triage
+docker-compose logs -f frontend
+docker-compose logs -f postgres
+docker-compose logs -f ollama
+
+# Monitor resource usage
+docker stats
+
+
+
+# Check container health status
+docker inspect --format='{{.State.Health.Status}}' tivramedi-postgres
+docker inspect --format='{{.State.Health.Status}}' tivramedi-ollama
+
+# View network connectivity
+docker network inspect tivramedi-network
+
+
+# View network connectivity
+docker network inspect tivramedi-network
+
+
+
+
+
+
+
+
+
+

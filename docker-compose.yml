@@ -13,7 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - D:/Programming/Internship/Development/TivraMedi/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - D:/Programming/Internship/Development/TivraMedi/database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -22,6 +22,25 @@ services:
       start_period: 40s
     networks:
       - tivramedi-network
+
+   # Ollama AI Service
+  ollama:
+    image: ollama/ollama:latest  # Use official image directly
+    container_name: tivramedi-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - tivramedi-network
+
 
   # Go Backend Service
   backend:
@@ -46,6 +65,23 @@ services:
         condition: service_healthy
     networks:
       - tivramedi-network
+
+  # FastAPI Triage Service
+  triage:
+    build: 
+      context: ./triage-service
+      dockerfile: Dockerfile
+    container_name: tivramedi-triage
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    ports:
+      - "8000:8000"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - tivramedi-network    
 
   # Vue.js Frontend Service (moved from frontend directory)
   frontend:
@@ -77,3 +113,6 @@ volumes:
   postgres_data:
     driver: local
     name: tivramedi_postgres_data
+  ollama_data:
+    driver: local
+    name: tivramedi_ollama_data  

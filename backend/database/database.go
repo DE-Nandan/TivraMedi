@@ -69,58 +69,12 @@ func ConnectDatabase() {
 
 	log.Println("Database connected successfully!")
 
-	// Your existing migration logic
-	log.Println(&models.Doctor{})
+	// Auto-migrate database schema
+	log.Println("Running database migrations...")
 	err = DB.AutoMigrate(&models.Doctor{}, &models.Booking{})
 	if err != nil {
 		log.Fatal("Failed to migrate database: ", err)
 	}
 	log.Println("Database migrated successfully!")
 
-	// Add sample data if tables are empty
-	seedDatabase()
-}
-
-func seedDatabase() {
-	// Check if we already have data
-	var doctorCount int64
-	DB.Model(&models.Doctor{}).Count(&doctorCount)
-
-	if doctorCount == 0 {
-		log.Println("Adding sample data...")
-
-		sampleDoctors := []models.Doctor{
-			{
-				Name:         "Dr. John Smith",
-				Specialty:    "Cardiologist",
-				Latitude:     40.7128,
-				Longitude:    -74.0060,
-				Availability: true,
-			},
-			{
-				Name:         "Dr. Sarah Johnson",
-				Specialty:    "General Practice",
-				Latitude:     40.7614,
-				Longitude:    -73.9776,
-				Availability: true,
-			},
-			{
-				Name:         "Dr. Mike Wilson",
-				Specialty:    "Pediatrics",
-				Latitude:     40.7505,
-				Longitude:    -73.9934,
-				Availability: false,
-			},
-		}
-
-		for _, doctor := range sampleDoctors {
-			if err := DB.Create(&doctor).Error; err != nil {
-				log.Printf("Failed to create sample doctor: %v", err)
-			}
-		}
-
-		log.Println("Sample data added successfully!")
-	} else {
-		log.Println("Sample data already exists, skipping seed.")
-	}
 }
