@@ -6,7 +6,7 @@
           <i class="fas fa-heartbeat"></i>
         </div>
         <div>
-          <h1>MediScan Health</h1>
+          <h1>TivraMedi Health</h1>
           <div class="subtitle">Advanced medical technology at your fingertips</div>
         </div>
       </div>
@@ -75,7 +75,7 @@
         <div>HIPAA Compliant • End-to-End Encryption</div>
       </div>
       <div class="copyright">
-        &copy; 2023 MediScan Health Technologies. For medical advice, consult a healthcare
+        &copy; 2023 TivraMedi Health Technologies. For medical advice, consult a healthcare
         professional.
       </div>
     </footer>

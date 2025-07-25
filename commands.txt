@@ -85,6 +85,10 @@ docker network inspect tivramedi-network
 docker network inspect tivramedi-network
 
 
+// pulling deepseek model
+docker exec tivramedi-ollama ollama pull deepseek-r1:1.5b
+
+
 
 
 

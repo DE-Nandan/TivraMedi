@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings" // Add this missing import
 	"time"
+	"tivramedi/controllers"
 	"tivramedi/database"
 	"tivramedi/routes"
 
@@ -92,6 +93,8 @@ func main() {
 	}
 
 	router.Use(cors.New(corsConfig))
+
+	controllers.BookingBroker.StartHeartbeat()
 
 	// 4. Add health check endpoint (important for Docker)
 	router.GET("/health", func(c *gin.Context) {
